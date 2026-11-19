@@ -136,6 +136,7 @@ class Book:
         self._copyNumber = copyNumber
 
         self._status: BookStatus = BookStatus.ON_SHELF
+        self._shelf: Shelf | None = None
         self._loanRecord: LoanRecord | None = None
         self._holdRecords: List[HoldRecord] = []
 
@@ -146,19 +147,19 @@ class Book:
         return self._title
 
     def setTitle(self, title: str) -> None:
-        raise NotImplementedError("setTitle method is not implemented yet.")
+        self._title = title
 
     def getAuthors(self) -> List[str]:
         return self._authors
 
     def setAuthors(self, authors: List[str]) -> None:
-        raise NotImplementedError("setAuthors method is not implemented yet.")
+        self._authors = authors
 
     def getYear(self) -> int:
         return self._year
 
     def setYear(self, year: int) -> None:
-        raise NotImplementedError("setYear method is not implemented yet.")
+        self._year = year
 
     def getCopyNumber(self) -> int:
         return self._copyNumber
@@ -170,13 +171,13 @@ class Book:
         self._status = status
 
     def getShelf(self) -> str | None:
-        raise NotImplementedError("getShelf method is not implemented yet.")
+        return self._shelf
 
     def setShelf(self, shelf: str) -> None:
-        raise NotImplementedError("setShelf method is not implemented yet.")
+        self._shelf = shelf
 
     def getCurrentLoan(self) -> LoanRecord | None:
-        raise NotImplementedError("getCurrentLoan method is not implemented yet.")
+        return self._loanRecord
 
     def setCurrentLoan(self, loan: 'LoanRecord') -> None:
         self._loanRecord = loan
@@ -185,18 +186,27 @@ class Book:
         return self._holdRecords
 
     def setHolds(self, holds: List['HoldRecord']) -> None:
-        raise NotImplementedError("setHolds method is not implemented yet.")
+        self._holdRecords = holds
 
     def isHeldBy(self, patron: Patron) -> bool:
-        #TODO: Implement logic to check if the book is held by the given patron.
-        return False
+        return self.hold is not None and self._hold.getPatron() is patron
 
     def matches(self, title: str, author: str, fromYear: int, toYear: int) -> bool:
-        raise NotImplementedError("matches method is not implemented yet.")
+        if title and title.lower() not in shelf._title.lower():
+            return False
+        if author and not any(author.lower() in a.lower() for a in self._authors):
+            return False
+        if fromYear and self._year < fromYear:
+            return False
+        if toYear and self._year > toYear:
+            return False
+        return True
 
     def conflictsWith(self, other: 'Book') -> bool:
         """Returns True if these details differ from this copy's details, indicating a conflict."""
-        raise NotImplementedError("conflictsWith method is not implemented yet.")
+        retrun (other.title != self._title
+                or other.authors != self._authors
+                or other.year != self._year)
 
 
 class Shelf:
@@ -288,7 +298,7 @@ class HoldRecord:
         self._callDate: date | None = None
 
     def getPatron(self) -> Patron:
-        raise NotImplementedError("getPatron method is not implemented yet.")
+        return self._patron
 
     def getBook(self) -> Book:
         raise NotImplementedError("getBook method is not implemented yet.")
