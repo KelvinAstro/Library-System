@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from datetime import date
 from enum import Enum
@@ -28,29 +30,29 @@ class User(ABC):
         self._password = None
         self._address = None
 
-        def getloginID(self) -> str:
-            return self.loginID
+    def getloginID(self) -> str:
+        return self.loginID
 
-        def getName(self) -> str:
-            return self.name
+    def getName(self) -> str:
+        return self.name
 
-        def setName(self, name: str) -> None:
-            self.name = name
+    def setName(self, name: str) -> None:
+        self.name = name
 
-        def getAddress(self) -> str | None:
-            return self._address
+    def getAddress(self) -> str | None:
+        return self._address
 
-        def setAddress(self, address: str) -> None:
-            self._address = address
+    def setAddress(self, address: str) -> None:
+        self._address = address
 
-        def getPassword(self) -> str | None:
-            return self._password
+    def getPassword(self) -> str | None:
+        return self._password
 
-        def setPassword(self, password: str) -> None:
-            self._password = password
+    def setPassword(self, password: str) -> None:
+        self._password = password
 
-        def verifyLogin(self, loginID: str, password: str) -> bool:
-            return self.loginID == loginID and self._password == password
+    def verifyLogin(self, loginID: str, password: str) -> bool:
+        return self.loginID == loginID and self._password == password
 
 
 class Patron(User):
@@ -268,7 +270,7 @@ class LoanRecord:
     def calculateFine(self) -> float:
         raise NotImplementedError("calculateFine method is not implemented yet.")
 
-    def renew(self) -> Bool:
+    def renew(self) -> bool:
         raise NotImplementedError("renew method is not implemented yet.")
 
     def close(self, today: date) -> None:
@@ -339,7 +341,8 @@ class Library:
         raise NotImplementedError("removeUser method is not implemented yet.")
 
     def nextPatronNumber(self) -> int:
-        return self._lastPatronNumber + 1
+        self._lastPatronNumber += 1
+        return self._lastPatronNumber
 
     def findShelf(self, shelfID: str) -> Shelf | None:
         return next((shelf for shelf in self._shelves if shelf.getShelfID() == shelfID), None)
@@ -409,12 +412,9 @@ class LibraryController:
     def getCurrentUser(self) -> User | None:
         raise NotImplementedError("getCurrentUser method is not implemented yet.")
 
-    def generateReport(self, reportType: ReportType, criteria: str) -> str:
-        raise NotImplementedError("generateReport method is not implemented yet.")
-
-
     def borrowBook(self, isbn: str, copyNumber: int) -> bool:
         #TODO: Implement logic to borrow a book based on ISBN and copy number, updating the relevant records and returning True if successful, False otherwise.
+        self.lastMessage = "Book borrowed"
         return True
 
     def returnBook(self, isbn: str, copyNumber: int) -> bool:
@@ -423,10 +423,10 @@ class LibraryController:
     def placeHold(self, isbn: str) -> bool:
         raise NotImplementedError("placeHold method is not implemented yet.")
 
-    def renewBook(self, isbn: str, copyNumber: int) -> None:
+    def renewBook(self, isbn: str, copyNumber: int) -> bool:
         raise NotImplementedError("renewBook method is not implemented yet.")
 
-    def serachBooks(self, title: str, author: str, fromYear: int, toYear: int) -> List[Book]:
+    def searchBooks(self, title: str, author: str, fromYear: int, toYear: int) -> List[Book]:
         raise NotImplementedError("searchBooks method is not implemented yet.")
 
     def payFine(self, amount: float) -> None:
