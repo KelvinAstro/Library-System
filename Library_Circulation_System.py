@@ -68,17 +68,18 @@ class Patron(User):
         return self._fines
 
     def getLoans(self) -> List['LoanRecord']:
-        raise NotImplementedError("getLoans method is not implemented yet.")
+        return self._loans
 
     def getHolds(self) -> List['HoldRecord']:
         raise NotImplementedError("getHolds method is not implemented yet.")
 
     def activeLoans(self) -> List['LoanRecord']:
-        raise NotImplementedError("activeLoans method is not implemented yet.")
+        return [loan for loan in self._loans if loan.isActive()]
 
     def canBorrow(self) -> bool:
-        raise NotImplementedError("canBorrow method is not implemented yet.")
-    
+        #TODO: Implement logic to determine if the patron can borrow more books based on active loans and fines.
+        return True
+
     def canPlaceHold(self, isbn: str) -> bool:
         raise NotImplementedError("canPlaceHold method is not implemented yet.")
 
@@ -88,11 +89,14 @@ class Patron(User):
     def hasHold(self, isbn: str) -> bool:
         raise NotImplementedError("hasHold method is not implemented yet.")
 
-    def findLLoan(self, loan: 'LoanRecord') -> LoanRecord | None:
-        raise NotImplementedError("findLLoan method is not implemented yet.")
+    def removeHold(self, hold: 'HoldRecord') -> None:
+        self._holds.remove(hold)
+
+    def findLoan(self, loan: 'LoanRecord') -> LoanRecord | None:
+        raise NotImplementedError("findLoan method is not implemented yet.")
 
     def addLoan(self, loan: 'LoanRecord') -> None:
-        raise NotImplementedError("addLoan method is not implemented yet.")
+        self._loans.append(loan)
 
     def addHold(self, hold: 'HoldRecord') -> None:
         raise NotImplementedError("addHold method is not implemented yet.")
@@ -161,7 +165,7 @@ class Book:
         return self._status 
 
     def setStatus(self, status: BookStatus) -> None:
-        raise NotImplementedError("setStatus method is not implemented yet.")
+        self._status = status
 
     def getShelf(self) -> str | None:
         raise NotImplementedError("getShelf method is not implemented yet.")
@@ -173,16 +177,17 @@ class Book:
         raise NotImplementedError("getCurrentLoan method is not implemented yet.")
 
     def setCurrentLoan(self, loan: 'LoanRecord') -> None:
-        raise NotImplementedError("setCurrentLoan method is not implemented yet.")
+        self._loanRecord = loan
 
     def getHolds(self) -> List['HoldRecord']:
-        raise NotImplementedError("getHolds method is not implemented yet.")
+        return self._holdRecords
 
     def setHolds(self, holds: List['HoldRecord']) -> None:
         raise NotImplementedError("setHolds method is not implemented yet.")
 
     def isHeldBy(self, patron: Patron) -> bool:
-        raise NotImplementedError("isHeldBy method is not implemented yet.")
+        #TODO: Implement logic to check if the book is held by the given patron.
+        return False
 
     def matches(self, title: str, author: str, fromYear: int, toYear: int) -> bool:
         raise NotImplementedError("matches method is not implemented yet.")
@@ -216,10 +221,10 @@ class Shelf:
         raise NotImplementedError("isFull method is not implemented yet.")
 
     def addBook(self, book: Book) -> None:
-        raise NotImplementedError("addBook method is not implemented yet.")
+        self._books.append(book)
 
     def removeBook(self, book: Book) -> None:
-        raise NotImplementedError("removeBook method is not implemented yet.")
+        self._books.remove(book)
 
 
 class LoanRecord:
@@ -246,7 +251,7 @@ class LoanRecord:
         raise NotImplementedError("getLoanDate method is not implemented yet.")
 
     def getDueDate(self) -> date | None:
-        raise NotImplementedError("getDueDate method is not implemented yet.")
+        return self._dueDate
 
     def getReturnDate(self) -> date | None:
         raise NotImplementedError("getReturnDate method is not implemented yet.")   
@@ -255,7 +260,7 @@ class LoanRecord:
         raise NotImplementedError("isRenewed method is not implemented yet.")
 
     def isActive(self) -> bool:
-        raise NotImplementedError("isActive method is not implemented yet.")
+        return self._returnDate is None
 
     def isOverdue(self) -> bool:
         raise NotImplementedError("isOverdue method is not implemented yet.")
@@ -308,7 +313,7 @@ class Library:
 
 
     def getCurrentDate(self) -> date:
-        raise NotImplementedError("getCurrentDate method is not implemented yet.")
+        return self._currentDate
 
     def setCurrentDate(self, currentDate: date) -> None:
         raise NotImplementedError("setCurrentDate method is not implemented yet.")
@@ -317,31 +322,30 @@ class Library:
         raise NotImplementedError("advanceDate method is not implemented yet.") 
 
     def getShelves(self) -> List[Shelf]:
-        raise NotImplementedError("getShelves method is not implemented yet.")
-
+        return self._shelves
     def getUsers(self) -> List[User]:
         raise NotImplementedError("getUsers method is not implemented yet.")
 
     def findUser(self, loginID: str) -> User | None:
-        raise NotImplementedError("findUser method is not implemented yet.")
+        return next((user for user in self.users if user.getloginID() == loginID), None)
 
     def allPatrons(self) -> List[Patron]:
         raise NotImplementedError("allPatrons method is not implemented yet.")
 
     def addUser(self, user: User) -> None:
-        raise NotImplementedError("addUser method is not implemented yet.")
+        self.users.append(user)
 
     def removeUser(self, user: User) -> None:
         raise NotImplementedError("removeUser method is not implemented yet.")
 
     def nextPatronNumber(self) -> int:
-        raise NotImplementedError("nextPatronNumber method is not implemented yet.")
+        return self._lastPatronNumber + 1
 
     def findShelf(self, shelfID: str) -> Shelf | None:
-        raise NotImplementedError("findShelf method is not implemented yet.")
+        return next((shelf for shelf in self._shelves if shelf.getShelfID() == shelfID), None)
 
     def findBook(self, isbn: str, copyNumber: int) -> Book | None:
-        raise NotImplementedError("findBook method is not implemented yet.")
+        return next((book for shelf in self._shelves for book in shelf.getBooks() if book.getISBN() == isbn and book.getCopyNumber() == copyNumber), None)
 
     def findCopies(self, isbn: str) -> List[Book]:
         raise NotImplementedError("findCopies method is not implemented yet.")
@@ -396,7 +400,8 @@ class LibraryController:
         self.lastMessage: str | None = None
 
     def login(self, loginID: str, password: str) -> bool:
-        raise NotImplementedError("login method is not implemented yet.")
+        #TODO: Implement login logic to authenticate the user based on loginID and password.
+        return True
 
     def logout(self) -> None:
         raise NotImplementedError("logout method is not implemented yet.")
@@ -409,7 +414,8 @@ class LibraryController:
 
 
     def borrowBook(self, isbn: str, copyNumber: int) -> bool:
-        raise NotImplementedError("borrowBook method is not implemented yet.")
+        #TODO: Implement logic to borrow a book based on ISBN and copy number, updating the relevant records and returning True if successful, False otherwise.
+        return True
 
     def returnBook(self, isbn: str, copyNumber: int) -> bool:
         raise NotImplementedError("returnBook method is not implemented yet.")
@@ -457,8 +463,8 @@ class LibraryController:
         raise NotImplementedError("_isLibrarian method is not implemented yet.")
 
     def _currentPatron(self) -> Patron | None:
-        raise NotImplementedError("_currentPatron method is not implemented yet.")
-
+        return self._currentUser if isinstance(self._currentUser, Patron) else None
+        
 class LibrarySystem:
     def __init__(self, controller: LibraryController):
         self._controller: LibraryController = controller
