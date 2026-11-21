@@ -204,9 +204,18 @@ class Book:
 
     def conflictsWith(self, other: 'Book') -> bool:
         """Returns True if these details differ from this copy's details, indicating a conflict."""
-        retrun (other.title != self._title
+        return (other.title != self._title
                 or other.authors != self._authors
                 or other.year != self._year)
+
+    def __eq__(self, other: Book) -> bool:
+        if not isinstance(other, Book):
+            return NotImplemented
+        return (self._isbn == other._isbn
+                and self._copyNumber == other._copyNumber)
+
+    def __hash__(self) -> int:
+        return hash((self._isbn, self._copyNumber))
 
 
 class Shelf:
