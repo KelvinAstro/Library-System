@@ -174,6 +174,7 @@ class Book:
         return self._shelf
 
     def setShelf(self, shelf: str) -> None:
+        """Move this book to shelf. The shelf decides: Flase if it refuses"""
         self._shelf = shelf
 
     def getCurrentLoan(self) -> LoanRecord | None:
@@ -236,16 +237,32 @@ class Shelf:
         return self._books
 
     def getBookCount(self) -> int:
-        raise NotImplementedError("getBookCount method is not implemented yet.")
+        return len(self._books)
 
     def isFull(self) -> bool:
-        raise NotImplementedError("isFull method is not implemented yet.")
+        return len(self._books) >= self.MAX_CAPACITY
 
-    def addBook(self, book: Book) -> None:
+    def addBook(self, book: Book) -> bool:
+        if book in self._books:
+            return False
+        if self.isFull():
+            return False
+        old = book._shelf
+        if old is not None and not old.removeBook(book):
+            raise RuntimeError(f"Book {book.getISBN()} copy {book.getCopyNumber()} "
+                               f"said it was on shelf {old.getShelfID()} but wasn't")
         self._books.append(book)
+        book._shelf = self
+        return True
 
-    def removeBook(self, book: Book) -> None:
+
+    def removeBook(self, book: Book) -> bool:
+        if book not in self._books:
+            return False
         self._books.remove(book)
+        if book._shelf is self:
+            book.shelf = None
+        return True
 
 
 class LoanRecord:
@@ -370,13 +387,14 @@ class Library:
         return next((book for shelf in self._shelves for book in shelf.getBooks() if book.getISBN() == isbn and book.getCopyNumber() == copyNumber), None)
 
     def findCopies(self, isbn: str) -> List[Book]:
-        raise NotImplementedError("findCopies method is not implemented yet.")
+        return [book for book in self.allBooks() if book.getISBN() == isbn]
 
     def allBooks(self) -> List[Book]:
-        raise NotImplementedError("allBooks method is not implemented yet.")
+        return [book for shelf in self._shelves for book in shelf.getBooks()]
 
     def nextCopyNumber(self, isbn: str) -> int:
-        raise NotImplementedError("nextCopyNumber method is not implemented yet.")
+        copies = self.findCopies(isbn)
+        return max((b.getCopyNumber() for b in copies), default=0) + 1
 
     def allLoans(self) -> List[LoanRecord]:
         raise NotImplementedError("allLoans method is not implemented yet.")
